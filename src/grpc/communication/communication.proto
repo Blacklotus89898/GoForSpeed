@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package communication;
+
+option go_package = "./pb";
+
+// Service for communication
+service Communicator {
+    rpc SendMessage (MessageRequest) returns (MessageResponse);
+}
+
+message MessageRequest {
+    string from = 1;  // Name of the sender
+    string content = 2;  // Message content
+}
+
+message MessageResponse {
+    string acknowledgement = 1;  // Acknowledgement message
+}
