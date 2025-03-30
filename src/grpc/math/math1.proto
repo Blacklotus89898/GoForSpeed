@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package math;
+
+option go_package = "./pb";
+
+// Service 1: Math operations
+service MathService {
+    rpc AddTwoNumbers (TwoNumbersRequest) returns (TwoNumbersResponse);
+    rpc MultiplyTwoNumbers (TwoNumbersRequest) returns (TwoNumbersResponse);
+}
+
+message TwoNumbersRequest {
+    float number1 = 1;
+    float number2 = 2;
+}
+
+message TwoNumbersResponse {
+    float result = 1;
+}
+
+// Service 2: Array operations
+service ArrayService {
+    rpc SumArray (ArrayRequest) returns (ArrayResponse);
+    rpc FindMax (ArrayRequest) returns (ArrayResponse);
+}
+
+message ArrayRequest {
+    repeated float numbers = 1; // An array of float numbers
+}
+
+message ArrayResponse {
+    float result = 1; // Result for sum or max
+}
