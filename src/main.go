@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"github.com/gorilla/websocket"
 )
 
+// WebSocket upgrader
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Allow all origins for WebSocket connections
@@ -63,10 +65,46 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Reverse Proxy Handler
+func reverseProxyHandler(targetServer string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Create a new request to the target server
+		proxyRequest, err := http.NewRequest(r.Method, targetServer+r.URL.Path, r.Body)
+		if err != nil {
+			http.Error(w, "Failed to create request", http.StatusInternalServerError)
+			return
+		}
+
+		// Copy headers from the original request to the proxy request
+		proxyRequest.Header = r.Header
+
+		// Send the request to the target server
+		client := &http.Client{}
+		proxyResponse, err := client.Do(proxyRequest)
+		if err != nil {
+			http.Error(w, "Failed to reach the target server", http.StatusBadGateway)
+			return
+		}
+		defer proxyResponse.Body.Close()
+
+		// Copy the headers from the proxy response to the original response
+		for key, values := range proxyResponse.Header {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+
+		// Write the status code and body back to the original response
+		w.WriteHeader(proxyResponse.StatusCode)
+		io.Copy(w, proxyResponse.Body)
+	}
+}
+
 func main() {
 	// Define flags for the port number and help
 	port := flag.String("port", "8080", "Port to run the server on")
 	help := flag.Bool("help", false, "Display help information")
+	proxyTarget := flag.String("proxyTarget", "http://localhost:8080/", "Target server for reverse proxy")
 	flag.Parse()
 
 	// Display help information if the help flag is set
@@ -81,6 +119,9 @@ func main() {
 	// HTTP and WebSocket routes
 	mux.HandleFunc("/", helloHandler)
 	mux.HandleFunc("/ws", websocketHandler) // Route for WebSocket connection
+
+	// Reverse proxy route
+	mux.HandleFunc("/proxy", reverseProxyHandler(*proxyTarget))
 
 	// Wrap the mux with the CORS middleware
 	handlerWithCors := corsMiddleware(mux)
