@@ -1,4 +1,4 @@
-module go-for-speed
+module github.com/Blacklotus89898/GoForSpeed/goForSpeed
 
 go 1.24.1
 

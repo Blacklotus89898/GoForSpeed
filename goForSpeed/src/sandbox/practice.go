@@ -3,7 +3,8 @@ package main // Package declaration required for every Go executable
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"go-for-speed/src/sandbox/anotherPackage" // Importing a custom package, relative to $GOPATH
+	"github.com/Blacklotus89898/GoForSpeed/goForSpeed/src/sandbox/anotherPackage" // Corrected import path
+	// "goForSpeed/src/anotherPackage" // Corrected import path for the custom package
 	"time"                              
 	"runtime"
 )

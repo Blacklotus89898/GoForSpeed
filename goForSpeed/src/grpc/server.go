@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	// Import the generated protobuf code
-	"go-for-speed/src/grpc/greeterpb"
+	"goForSpeed/src/grpc/greeterpb"
 )
 
 // server is used to implement the Greeter service

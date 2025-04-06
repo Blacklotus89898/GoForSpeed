@@ -6,7 +6,7 @@ import (
     "net"
 
     "google.golang.org/grpc"
-    pb "go-for-speed/src/grpc/communication/pb" // Ensure the import path matches your setup
+    pb "goForSpeed/src/grpc/communication/pb" // Ensure the import path matches your setup
 )
 
 type communicatorServer struct {

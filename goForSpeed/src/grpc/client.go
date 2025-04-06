@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"go-for-speed/src/grpc/greeterpb" // Ensure the import path matches your setup
+	"goForSpeed/src/grpc/greeterpb" // Ensure the import path matches your setup
 )
 
 func main() {

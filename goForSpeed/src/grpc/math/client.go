@@ -6,7 +6,7 @@ import (
     "time"
 
     "google.golang.org/grpc"
-    pb "go-for-speed/src/grpc/math/pb" // Replace with the actual path to your generated files
+    pb "goForSpeed/src/grpc/math/pb" // Replace with the actual path to your generated files
 )
 
 func main() {
