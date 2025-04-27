@@ -1,14 +1,22 @@
 package main
 
-import "net/http"
+import (
+
+	"net/http"
+	pb "common/api"
+	"common"
+
+
+)
 
 type handler struct {
 	// gateway
+	client pb.OrderServiceClient
 
 }
 
-func NewHandler() *handler {
-	return &handler{}
+func NewHandler(client pb.OrderServiceClient) *handler {
+	return &handler{client}
 }
 
 func (h *handler) registerRoutes(mux *http.ServeMux) {
@@ -17,9 +25,19 @@ func (h *handler) registerRoutes(mux *http.ServeMux) {
 }
 
 func (h *handler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
-	// 1. Parse the request body to get the order details
-	// 2. Validate the order details
-	// 3. Call the orders service to create the order
-	// 4. Return the response to the client
+	customerID := r.PathValue("customerID")
+
+	var items []*pb.ItemsWithQuantity
+	if err := common.ReadJSON(w, r, &items); err != nil {
+		common.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+
+
+	h.client.CreateOrder(r.Context(), &pb.CreateOrderRequest{
+		CustomerID: customerID,
+		Items: items,
+})
 
 }
