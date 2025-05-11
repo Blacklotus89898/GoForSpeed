@@ -21,6 +21,7 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	
 	} 
+	return nil
 }
 
 func WriteError(w http.ResponseWriter, status int, message string) {

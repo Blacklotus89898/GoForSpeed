@@ -12,7 +12,11 @@ make gen
 ## Running
 
 ```bash
+# For the http server
 go run gateway
+
+# For grpc
+go run orders 
 
 
 ```
