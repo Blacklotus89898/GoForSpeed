@@ -1,18 +1,18 @@
 package main
 
 import (
-
-	"net/http"
-	pb "common/api"
 	"common"
+	pb "common/api"
+	"errors"
+	"net/http"
 
-
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type handler struct {
 	// gateway
 	client pb.OrderServiceClient
-
 }
 
 func NewHandler(client pb.OrderServiceClient) *handler {
@@ -21,7 +21,7 @@ func NewHandler(client pb.OrderServiceClient) *handler {
 
 func (h *handler) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/customers/{customerID}/orders", h.HandleCreateOrder)
-	
+
 }
 
 func (h *handler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +33,43 @@ func (h *handler) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateItems(items); err != nil {
+		common.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
-
-	h.client.CreateOrder(r.Context(), &pb.CreateOrderRequest{
+	o, err := h.client.CreateOrder(r.Context(), &pb.CreateOrderRequest{
 		CustomerID: customerID,
-		Items: items,
-})
+		Items:      items,
+	})
 
+	// Special handling for gRPC errors
+	rStatus := status.Convert(err)
+	if rStatus != nil {
+		if rStatus.Code() != codes.InvalidArgument {
+			common.WriteError(w, http.StatusBadRequest, rStatus.Message())
+			return
+		}
+		common.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+
+	common.WriteJSON(w, http.StatusOK, o)
+}
+
+func validateItems(items []*pb.ItemsWithQuantity) error {
+	if len(items) == 0 {
+		return errors.New("items cannot be empty")
+	}
+	for _, item := range items {
+		if item.ID == "" {
+			return errors.New("item ID cannot be empty")
+		}
+
+		if item.Quantity <= 0 {
+			return common.ErrNoItems
+		}
+	}
+	return nil
 }
